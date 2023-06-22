@@ -15,12 +15,59 @@ def get_first_sentence(text: str):
     after = text[len(first_sentence):]
     return first_sentence, after
 
+import configparser
+import re
+import random
 
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
+truncate_str = config.get('LLM_Claude', 'truncate')
+truncate = [float(val) for val in truncate_str.split(',')]
+MAX_LEN = int(config['LLM_Claude']['MAX_LEN'])
+parse_flag = config['LLM_Claude']['parse_flag']
+
+# 分割回复函数
 def divede_sentences(text: str) -> List[str]:
+    # 去掉头尾的标点符号
+    text = text.strip('""''\"\'!!。.??~')
+    # 去掉开头的 : 及其前面的字符串
+    text = re.sub('^.*:', '', text)
     sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return [text]
-    return sentences
+    if str2bool(parse_flag):# 限制回复函数
+        if len(sentences) > MAX_LEN:  # 有时候bot说太多了
+            sentences = sentences[:MAX_LEN]
+            for sentence in sentences:
+                print(sentence)
+        if len(sentences) > 2:
+            print(f'Truncate probability: {truncate}')
+            for i in range(len(truncate)):  # 让ai少说点
+                try:
+                    if random.random() < truncate[i]:
+                        sentences.pop()
+                        print('truncate!')
+                except IndexError:
+                    continue
+
+    merged_sentences = []
+    current_sentence = sentences[0]
+    for sentence in sentences[1:]:
+        if len(current_sentence) < 10:
+            current_sentence += sentence
+        else:
+            merged_sentences.append(current_sentence)
+            current_sentence = sentence
+
+    merged_sentences.append(current_sentence)
+    merged_sentences = [sentence.rstrip('，~。！？…') for sentence in merged_sentences]
+
+    return merged_sentences
+#def divede_sentences(text: str) -> List[str]:
+#    sentences = re.findall(r'.*?[~。！？…]+', text)
+#    if len(sentences) == 0:
+#        return [text]
+#    return sentences
 
 
 def make_message(text: str):

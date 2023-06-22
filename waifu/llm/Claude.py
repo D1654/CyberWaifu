@@ -7,6 +7,13 @@ from slack_sdk.errors import SlackApiError
 from typing import List
 from langchain.schema import HumanMessage, SystemMessage, AIMessage, BaseMessage
 import time
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
+fckmsg=config['LLM']['fckmsg']
+fckaft=config['LLM']['fckaft']
+chanel_id=config['LLM_Claude']['chanel_id']
+
 
 server_token = ''
 
@@ -19,32 +26,36 @@ class SlackClient(WebClient):
     def chat(self, text):
         if not self.CHANNEL_ID:
             raise Exception("Channel not found.")
-
+        if chanel_id:
+            text=f'<@claude> {text}'
         resp = self.chat_postMessage(channel=self.CHANNEL_ID, text=text)
         self.LAST_TS = resp["ts"]
 
     def open_channel(self, bot_id: str):
-        if not self.CHANNEL_ID:
+        if chanel_id:
+            self.CHANNEL_ID = chanel_id
+        elif not self.CHANNEL_ID:
             response = self.conversations_open(users=bot_id)
             self.CHANNEL_ID = response["channel"]["id"]
 
 
     def get_reply_nonstream(self, bot_id: str):
-        for _ in range(150):
+        for _ in range(120):
             try:
                 resp = self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=2)
                 msg = [msg["text"] for msg in resp["messages"] if msg["user"] == bot_id]
-                if msg and not msg[-1].endswith("Typing…_"):
-                    return msg[-1].replace(',', '，').replace('!', '！').replace('?', '？')
+                #print(f"resp: {resp}")
+                print(f"msg: {msg}")
+                if msg and not msg[0].endswith("Typing…_"):
+                    return msg[0].replace(',', '，').replace('!', '！').replace('?', '？')
             except (SlackApiError, KeyError) as e:
                 print(f"Get reply error: {e}")
                 return 'Calude Error'
             time.sleep(0.5)
 
-
     def get_reply(self, bot_id: str):
         last = ''
-        for _ in range(150):
+        for _ in range(120):
             try:
                 resp = self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=2)
                 msg = [msg["text"] for msg in resp["messages"] if msg["user"] == bot_id]
@@ -56,7 +67,6 @@ class SlackClient(WebClient):
                 if msg and not msg[-1].endswith("Typing…_"):
                     self.CALLBACK.on_llm_end(text[len(last):])
                     return msg[-1].replace(',', '，').replace('!', '！').replace('?', '？')
-
             except (SlackApiError, KeyError) as e:
                 print(f"Get reply error: {e}")
                 return 'Calude Error'
@@ -88,11 +98,11 @@ class Claude(Brain):
         prompt = ''
         for mes in messages:
             if isinstance(mes, HumanMessage):
-                prompt += f'Human: ```\n{mes.content}\n```\n\n'
+                prompt += f'Human: ```\n{mes.content}\n```\n'
             elif isinstance(mes, SystemMessage):
-                prompt += f'System Information: ```\n{mes.content}\n```\n\n'
+                prompt += f'System Information:\n{mes.content}\n'
             elif isinstance(mes, AIMessage):
-                prompt += f'AI: ```\n{mes.content}\n```\n\n'
+                prompt += f'AI:{fckaft} ```\n{mes.content}\n```\n'
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 
@@ -107,11 +117,11 @@ class Claude(Brain):
         prompt = ''
         for mes in messages:
             if isinstance(mes, HumanMessage):
-                prompt += f'Human: ```\n{mes.content}\n```\n\n'
+                prompt += f'Human: \n{mes.content}\n'
             elif isinstance(mes, SystemMessage):
-                prompt += f'System Information: ```\n{mes.content}\n```\n\n'
+                prompt += f'System Information:```\n{mes.content}\n```\n'
             elif isinstance(mes, AIMessage):
-                prompt += f'AI: ```\n{mes.content}\n```\n\n'
+                prompt += f'AI: \n{mes.content}\n'
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 

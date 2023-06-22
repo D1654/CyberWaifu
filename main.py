@@ -38,6 +38,12 @@ if tts_model == 'Edge':
 	api = config['TTS_Edge']['azure_speech_key']
 	if api == '':
 		use_emotion = False
+# Vits语音配置激活
+elif tts_model == 'Vits':
+	tts = TTS(speak, voice)
+	api = config['TTS_Edge']['azure_speech_key']
+	if api == '':
+		use_emotion = False
 
 # Thoughts 思考链配置
 emoticons = config.items('Thoughts_Emoticon')

@@ -8,6 +8,11 @@ from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
 import logging
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
+fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
+fckaft = config['LLM']['fckaft'].replace('\\n', '\n')
 
 class Waifu():
     '''CyberWaifu'''
@@ -26,7 +31,8 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
+        self.charactor_prompt = SystemMessage(content=f'{prompt}\n\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n\nYour additional rules:```\n{fckmsg}\n```\n')
+        #\nYour additional rules:```\n{fckmsg}\n```\n
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
@@ -61,11 +67,11 @@ class Waifu():
         # 第二次检查 历史记录+用户文本 是否过长
         logging.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
         if self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 384:
             self.summarize_memory()
         # 第三次检查，如果仍然过长，暴力裁切记忆
         while self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 384:
             self.cut_memory()
 
         messages = [self.charactor_prompt]
@@ -85,7 +91,7 @@ class Waifu():
             relative_memory = relative_memory[:i]
 
         if len(relative_memory) > 0:
-            memory_prompt = f'This following message is relative context for your response:\n\n{str(relative_memory)}'
+            memory_prompt = f'This following message is relative context for your response:\n{str(relative_memory)}'
             memory_message = SystemMessage(content=memory_prompt)
             messages.append(memory_message)
 
