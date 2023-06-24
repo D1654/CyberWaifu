@@ -2,17 +2,22 @@ import json
 import os
 import waifu.Thoughts
 from pycqBot.cqCode import face
-from waifu.Tools import make_message, message_period_to_now
+from waifu.Tools import make_message, message_period_to_now, load_prompt
 from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
 import logging
+import time
 import configparser
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
 fckaft = config['LLM']['fckaft'].replace('\\n', '\n')
+
+#提前调入预设用
+charactor 	 = config['CyberWaifu']['charactor']
+preprompt = load_prompt(charactor)
 
 class Waifu():
     '''CyberWaifu'''
@@ -31,7 +36,7 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'{prompt}\n\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n\nYour additional rules:```\n{fckmsg}\n```\n')
+        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n\nYour additional rules:\n{fckmsg}')
         #\nYour additional rules:```\n{fckmsg}\n```\n
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
@@ -57,7 +62,7 @@ class Waifu():
 
 
     def ask(self, text: str) -> str:
-        '''发送信息'''
+        '''发送信息''' 
         if text == '':
             return ''
         message = make_message(text)
@@ -124,6 +129,10 @@ class Waifu():
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
         logging.debug(f'LLM query')
+        
+        self.brain.think(f'System Information:\n{preprompt}') #提前单独发送preprompt，避免过度并联对话。
+        time.sleep(0.5)
+        
         reply = self.brain.think(messages)
 
         history = []

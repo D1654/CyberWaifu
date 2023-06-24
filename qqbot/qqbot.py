@@ -4,7 +4,7 @@ from VITS_GENSHIN import Trans_GS
 from pycqBot.cqHttpApi import cqHttpApi, cqLog
 from pycqBot.data import Message
 from waifu.Waifu import Waifu
-from waifu.Tools import divede_sentences
+from waifu.Tools import divede_sentences, load_prompt
                              
                                  
 import logging
@@ -17,6 +17,10 @@ config.read('config.ini', encoding='utf-8')
 voice_model = config['TTS']['model']
 osou=config['TTS']['osou']
 fckcla=config['LLM']['fckcla'].replace('\\n', '\n')
+
+#提前调入预设用
+#charactor 	 = config['CyberWaifu']['charactor']
+#prempt = load_prompt(charactor)
 
 
 #vits 音色列表 用于选择
@@ -51,8 +55,10 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
         if 'CQ' in message.message:
             return
         try:
+#            waifu.brain.think(f'{prempt}') #提前单独发送preprompt，避免过度并联对话。
+#            time.sleep(Time_delay)
             reply = waifu.ask(message.message)
-            sentences = divede_sentences(reply) #分句子切割回复
+            sentences = divede_sentences(reply) #切割裁剪截断去符号处理
             for st in sentences:
                 time.sleep(Time_delay)
                 if st == '' or st == ' ':

@@ -46,8 +46,8 @@ class SlackClient(WebClient):
                 msg = [msg["text"] for msg in resp["messages"] if msg["user"] == bot_id]
                 #print(f"resp: {resp}")
                 print(f"msg: {msg}")
-                if msg and not msg[0].endswith("Typing…_"):
-                    return msg[0].replace(',', '，').replace('!', '！').replace('?', '？')
+                if msg and not msg[-1].endswith("Typing…_"):
+                    return msg[-1].replace(',', '，').replace('!', '！').replace('?', '？')
             except (SlackApiError, KeyError) as e:
                 print(f"Get reply error: {e}")
                 return 'Calude Error'
@@ -100,9 +100,9 @@ class Claude(Brain):
             if isinstance(mes, HumanMessage):
                 prompt += f'Human: ```\n{mes.content}\n```\n'
             elif isinstance(mes, SystemMessage):
-                prompt += f'System Information:\n{mes.content}\n'
+                prompt += f'System Information: ```\n{mes.content}\n```\n'
             elif isinstance(mes, AIMessage):
-                prompt += f'AI:{fckaft} ```\n{mes.content}\n```\n'
+                prompt += f'AI: {fckaft} ```\n{mes.content}\n```\n'
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 
@@ -117,11 +117,11 @@ class Claude(Brain):
         prompt = ''
         for mes in messages:
             if isinstance(mes, HumanMessage):
-                prompt += f'Human: \n{mes.content}\n'
+                prompt += f'Human: ```\n{mes.content}\n```\n'
             elif isinstance(mes, SystemMessage):
                 prompt += f'System Information:```\n{mes.content}\n```\n'
             elif isinstance(mes, AIMessage):
-                prompt += f'AI: \n{mes.content}\n'
+                prompt += f'AI: ```\n{mes.content}\n```\n'
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 
