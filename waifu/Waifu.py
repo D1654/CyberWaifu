@@ -13,7 +13,7 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
-fckaft = config['LLM']['fckaft'].replace('\\n', '\n')
+fckaftAI = config['LLM']['fckaftAI'].replace('\\n', '\n')
 
 #提前调入预设用
 charactor 	 = config['CyberWaifu']['charactor']
@@ -36,7 +36,7 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n\nYour additional rules:\n{fckmsg}')
+        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
         #\nYour additional rules:```\n{fckmsg}\n```\n
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()

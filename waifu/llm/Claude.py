@@ -10,8 +10,9 @@ import time
 import configparser
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
-fckmsg=config['LLM']['fckmsg']
-fckaft=config['LLM']['fckaft']
+fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
+fckaftHuman=config['LLM']['fckaftHuman']
+fckaftAI=config['LLM']['fckaftAI']
 chanel_id=config['LLM_Claude']['chanel_id']
 
 
@@ -22,6 +23,8 @@ class SlackClient(WebClient):
     CHANNEL_ID = None
     LAST_TS = None
     CALLBACK = None
+    if chanel_id:
+        CHANNEL_ID = chanel_id
 
     def chat(self, text):
         if not self.CHANNEL_ID:
@@ -32,9 +35,9 @@ class SlackClient(WebClient):
         self.LAST_TS = resp["ts"]
 
     def open_channel(self, bot_id: str):
-        if chanel_id:
-            self.CHANNEL_ID = chanel_id
-        elif not self.CHANNEL_ID:
+#        if chanel_id:
+#            self.CHANNEL_ID = chanel_id
+        if not self.CHANNEL_ID:
             response = self.conversations_open(users=bot_id)
             self.CHANNEL_ID = response["channel"]["id"]
 
@@ -95,14 +98,15 @@ class Claude(Brain):
             return self.claude.get_reply_nonstream(self.bot_id)
         if len(messages) == 0:
             return ''
-        prompt = ''
+        prompt = f'Your additional rules:```\n{fckmsg}\n```\n'
+        #\nYour additional rules:```\n{fckmsg}\n```\n
         for mes in messages:
             if isinstance(mes, HumanMessage):
-                prompt += f'Human: ```\n{mes.content}\n```\n'
+                prompt += f'Human{fckaftHuman}: ```\n{mes.content}\n```\n'
             elif isinstance(mes, SystemMessage):
                 prompt += f'System Information: ```\n{mes.content}\n```\n'
             elif isinstance(mes, AIMessage):
-                prompt += f'AI: {fckaft} ```\n{mes.content}\n```\n'
+                prompt += f'AI{fckaftAI}: ```\n{mes.content}\n```\n'
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 
