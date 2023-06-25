@@ -28,13 +28,18 @@ parse_flag = config['LLM_Claude']['parse_flag']
 
 # 分割回复函数
 def divede_sentences(text: str) -> List[str]:
+    if text == '':
+        return [text]
+
     # 去掉头尾的标点符号
     text = text.strip('""''\"\'!!。.??~')
     # 去掉开头的 : 及其前面的字符串
     text = re.sub('^.*:', '', text)
+
     sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return [text]
+
     if str2bool(parse_flag):# 限制回复函数
         if len(sentences) > MAX_LEN:  # 有时候bot说太多了
             sentences = sentences[:MAX_LEN]

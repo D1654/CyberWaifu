@@ -35,9 +35,9 @@ class SlackClient(WebClient):
         self.LAST_TS = resp["ts"]
 
     def open_channel(self, bot_id: str):
-#        if chanel_id:
-#            self.CHANNEL_ID = chanel_id
-        if not self.CHANNEL_ID:
+        if chanel_id:
+            self.CHANNEL_ID = chanel_id
+        else:
             response = self.conversations_open(users=bot_id)
             self.CHANNEL_ID = response["channel"]["id"]
 
@@ -98,8 +98,7 @@ class Claude(Brain):
             return self.claude.get_reply_nonstream(self.bot_id)
         if len(messages) == 0:
             return ''
-        prompt = f'Your additional rules:```\n{fckmsg}\n```\n'
-        #\nYour additional rules:```\n{fckmsg}\n```\n
+        prompt = ''
         for mes in messages:
             if isinstance(mes, HumanMessage):
                 prompt += f'Human{fckaftHuman}: ```\n{mes.content}\n```\n'

@@ -36,7 +36,7 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
+        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
         #\nYour additional rules:```\n{fckmsg}\n```\n
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
@@ -92,13 +92,19 @@ class Waifu():
             total_token += self.brain.llm.get_num_tokens(relative_memory[i])
             if(total_token >= 1024):
                 is_full = True
+                break
         if is_full:
             relative_memory = relative_memory[:i]
 
         if len(relative_memory) > 0:
-            memory_prompt = f'This following message is relative context for your response:\n{str(relative_memory)}'
+            relat_mem = ''
+            for i in range(len(relative_memory)):
+                relat_mem += f'{relative_memory[i]}\n'
+            memory_prompt = f'This following message is relative context for your response:\n{relat_mem}'
+            memory_prompt = memory_prompt.replace("\\n", "\n")
             memory_message = SystemMessage(content=memory_prompt)
             messages.append(memory_message)
+            #注释掉不会把相关记忆加入发送消息中的代码
 
             mem_info = ''
             for i in range(len(relative_memory)):
@@ -130,8 +136,17 @@ class Waifu():
             self.cut_memory()
         logging.debug(f'LLM query')
         
-        self.brain.think(f'System Information:\n{preprompt}') #提前单独发送preprompt，避免过度并联对话。
+        self.brain.think(f'System Information:\n{preprompt}')
+        #提前单独发送preprompt，避免过度并联对话。
         time.sleep(0.5)
+        
+        self.brain.think(f'Your additional rules:```\n{fckmsg}\n```\n')
+        time.sleep(0.5)
+#        if len(relative_memory) > 0:
+#            memory_preprompt = f'```\nThis following message is relative context for your response:\n{str(relative_memory)}\n```'
+#            self.brain.think(f'System Information:{memory_preprompt}')
+        #提前单独发送memory_preprompt，避免相关记忆token数过多。
+#        time.sleep(0.5)
         
         reply = self.brain.think(messages)
 

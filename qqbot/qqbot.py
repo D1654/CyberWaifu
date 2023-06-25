@@ -55,9 +55,12 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
         if 'CQ' in message.message:
             return
         try:
-#            waifu.brain.think(f'{prempt}') #提前单独发送preprompt，避免过度并联对话。
-#            time.sleep(Time_delay)
             reply = waifu.ask(message.message)
+            if reply == '':
+            # 处理空回复的情况，例如跳过处理或返回错误信息
+                logging.info('Claude BAN了你，没有回应你~')
+                message.sender.send_message('Claude BAN了你，没回应你~')
+                return
             sentences = divede_sentences(reply) #切割裁剪截断去符号处理
             for st in sentences:
                 time.sleep(Time_delay)
