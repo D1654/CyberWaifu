@@ -268,11 +268,6 @@ class Waifu():
         CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
         print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
-        if summary == '':
-            self.brain.think(f'/reset ')
-            #/reset。
-            time.sleep(0.5)
-            summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()

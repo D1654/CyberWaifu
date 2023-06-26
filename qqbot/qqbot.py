@@ -5,8 +5,7 @@ from pycqBot.cqHttpApi import cqHttpApi, cqLog
 from pycqBot.data import Message
 from waifu.Waifu import Waifu
 from waifu.Tools import divede_sentences, load_prompt
-                             
-                                 
+
 import logging
 import json
 import os
@@ -17,11 +16,6 @@ config.read('config.ini', encoding='utf-8')
 voice_model = config['TTS']['model']
 osou=config['TTS']['osou']
 fckcla=config['LLM']['fckcla'].replace('\\n', '\n')
-
-#提前调入预设用
-#charactor 	 = config['CyberWaifu']['charactor']
-#prempt = load_prompt(charactor)
-
 
 #vits 音色列表 用于选择
 yozo_dict = {"宁宁": 0, "爱瑠": 1, "芳乃": 2, "茉子": 3, "丛雨": 4, "小春": 5, "七海": 6, }
