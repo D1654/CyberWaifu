@@ -112,7 +112,7 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
             time.sleep(Time_delay)
             waifu.brain.think(f'{fckcla}')
             time.sleep(Time_delay)
-            waifu.brain.think('/reset \u200B')
+            waifu.brain.think('/reset Please forget the conversation history.')
         except Exception as e:
             logging.error(e)
 

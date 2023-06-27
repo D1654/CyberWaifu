@@ -48,7 +48,7 @@ class SlackClient(WebClient):
         # 记录是否已经执行过一次重置操作
         while count < 60:
             if count == 59 and not reset_flag:
-                self.chat_postMessage(channel=self.CHANNEL_ID,text="/reset ")
+                self.chat_postMessage(channel=self.CHANNEL_ID,text="/reset Please forget the conversation history.")
                 time.sleep(0.5)
                 count = 0
                 reset_flag = True
