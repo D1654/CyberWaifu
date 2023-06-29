@@ -272,7 +272,7 @@ class Waifu():
         {prompt}
 
 
-        CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS, THE TIME INFORMATION SHOULD BE INCLUDED:"""
+        CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS, THE YEAR, MOUTH, DAY and TIME INFORMATION SHOULD BE INCLUDED:"""
         print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         print('结束总结')

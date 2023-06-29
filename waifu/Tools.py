@@ -65,7 +65,7 @@ def divede_sentences(text: str) -> List[str]:
             current_sentence = sentence
 
     merged_sentences.append(current_sentence)
-    #merged_sentences = [sentence.rstrip('，~。！？…') for sentence in merged_sentences]
+    merged_sentences = [sentence.rstrip('，。') for sentence in merged_sentences]
     #这一句为去除每一分局的结尾符号，现已注释掉
 
     return merged_sentences
