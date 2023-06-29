@@ -31,16 +31,16 @@ def divede_sentences(text: str) -> List[str]:
     if text == '':
         return [text]
 
-    # 去掉头尾的标点符号
-    text = text.strip('""''\"\'!!。.??~')
-    # 去掉开头的 : 及其前面的字符串
-    text = re.sub('^.*:', '', text)
-
     sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return [text]
 
     if str2bool(parse_flag):# 限制回复函数
+
+        # 去掉头尾的标点符号
+        text = text.strip('""''\"\'!!。.??~')
+        # 去掉开头的 : 及其前面的字符串
+        text = re.sub('^.*:', '', text)
         if len(sentences) > MAX_LEN:  # 有时候bot说太多了
             sentences = sentences[:MAX_LEN]
             for sentence in sentences:
@@ -65,7 +65,8 @@ def divede_sentences(text: str) -> List[str]:
             current_sentence = sentence
 
     merged_sentences.append(current_sentence)
-    merged_sentences = [sentence.rstrip('，~。！？…') for sentence in merged_sentences]
+    #merged_sentences = [sentence.rstrip('，~。！？…') for sentence in merged_sentences]
+    #这一句为去除每一分局的结尾符号，现已注释掉
 
     return merged_sentences
 #def divede_sentences(text: str) -> List[str]:

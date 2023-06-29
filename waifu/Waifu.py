@@ -14,9 +14,11 @@ config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
 fckaftAI = config['LLM']['fckaftAI'].replace('\\n', '\n')
+befcharactor = config['LLM']['befcharactor'].replace('\\n', '\n')
+limit_words = config['LLM']['limit_words'].replace('\\n', '\n')
 
 #提前调入预设用
-charactor 	 = config['CyberWaifu']['charactor']
+charactor = config['CyberWaifu']['charactor']
 preprompt = load_prompt(charactor)
 
 class Waifu():
@@ -36,7 +38,7 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
+        self.charactor_prompt = SystemMessage(content=f'{befcharactor}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
@@ -147,7 +149,7 @@ class Waifu():
 #            self.brain.think(f'System Information:{memory_preprompt}')
         #提前单独发送memory_preprompt，避免相关记忆token数过多。
 #        time.sleep(0.5)
-        
+
         reply = self.brain.think(messages)
 
         history = []
@@ -161,6 +163,11 @@ class Waifu():
 
         if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 2048:
             self.summarize_memory()
+
+# ==== limit_words开始处 ====
+#        if limit_words:
+#            messages.append(f'{limit_words}')
+# ==== limit_words结束处 ====
 
         logging.info('结束回复')
         return reply
@@ -259,13 +266,13 @@ class Waifu():
                 prompt += f'System Information: {mes.content}\n\n'
             elif isinstance(mes, AIMessage):
                 prompt += f'{self.name}: {mes.content}\n\n'
-        prompt_template = f"""Write a concise summary of the following, time information should be include:
+        prompt_template = f"""Write a concise summary for the following:
 
 
         {prompt}
 
 
-        CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
+        CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS, THE TIME INFORMATION SHOULD BE INCLUDED:"""
         print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         print('结束总结')
