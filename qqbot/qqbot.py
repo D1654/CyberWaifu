@@ -110,8 +110,9 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
                 abs_path = os.path.abspath(file_path)
                 message.sender.send_message("%s" % image(file='file:///' + abs_path))
             time.sleep(Time_delay)
-            waifu.brain.think(f'{fckcla}')
-            time.sleep(Time_delay)
+            if fckcla:
+                waifu.brain.think(f'{fckcla}')
+                time.sleep(Time_delay)
             waifu.brain.think('/reset Please forget the conversation history.')
         except Exception as e:
             logging.error(e)

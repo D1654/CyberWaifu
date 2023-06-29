@@ -140,8 +140,9 @@ class Waifu():
         #提前单独发送preprompt，避免过度并联对话。
         time.sleep(0.5)
         
-        self.brain.think(f'Your additional rules:```\n{fckmsg}\n```\n')
-        time.sleep(0.5)
+        if fckmsg:
+            self.brain.think(f'Your additional rules:```\n{fckmsg}\n```\n')
+            time.sleep(0.5)
 #        if len(relative_memory) > 0:
 #            memory_preprompt = f'```\nThis following message is relative context for your response:\n{str(relative_memory)}\n```'
 #            self.brain.think(f'System Information:{memory_preprompt}')
