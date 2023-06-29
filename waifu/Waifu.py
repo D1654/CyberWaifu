@@ -37,7 +37,6 @@ class Waifu():
         self.name = name
         self.username = username
         self.charactor_prompt = SystemMessage(content=f'Your name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
-        #\nYour additional rules:```\n{fckmsg}\n```\n
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
@@ -141,7 +140,7 @@ class Waifu():
         time.sleep(0.5)
         
         if fckmsg:
-            self.brain.think(f'Your additional rules:```\n{fckmsg}\n```\n')
+            self.brain.think(f'System Information:\n\nYour additional rules:```\n{fckmsg}\n```\n')
             time.sleep(0.5)
 #        if len(relative_memory) > 0:
 #            memory_preprompt = f'```\nThis following message is relative context for your response:\n{str(relative_memory)}\n```'
