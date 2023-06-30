@@ -15,7 +15,6 @@ config.read('config.ini', encoding='utf-8')
 fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
 fckaftAI = config['LLM']['fckaftAI'].replace('\\n', '\n')
 befcharactor = config['LLM']['befcharactor'].replace('\\n', '\n')
-limit_words = config['LLM']['limit_words'].replace('\\n', '\n')
 
 #提前调入预设用
 charactor = config['CyberWaifu']['charactor']
@@ -73,11 +72,11 @@ class Waifu():
         # 第二次检查 历史记录+用户文本 是否过长
         logging.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
         if self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 384:
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 399:
             self.summarize_memory()
         # 第三次检查，如果仍然过长，暴力裁切记忆
         while self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 384:
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 399:
             self.cut_memory()
 
         messages = [self.charactor_prompt]
@@ -136,7 +135,6 @@ class Waifu():
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
         logging.debug(f'LLM query')
-        
         self.brain.think(f'System Information:\n{preprompt}')
         #提前单独发送preprompt，避免过度并联对话。
         time.sleep(0.5)
@@ -144,12 +142,12 @@ class Waifu():
         if fckmsg:
             self.brain.think(f'System Information:\n\nYour additional rules:```\n{fckmsg}\n```\n')
             time.sleep(0.5)
+
 #        if len(relative_memory) > 0:
 #            memory_preprompt = f'```\nThis following message is relative context for your response:\n{str(relative_memory)}\n```'
 #            self.brain.think(f'System Information:{memory_preprompt}')
         #提前单独发送memory_preprompt，避免相关记忆token数过多。
 #        time.sleep(0.5)
-
         reply = self.brain.think(messages)
 
         history = []
@@ -163,11 +161,6 @@ class Waifu():
 
         if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 2048:
             self.summarize_memory()
-
-# ==== limit_words开始处 ====
-#        if limit_words:
-#            messages.append(f'{limit_words}')
-# ==== limit_words结束处 ====
 
         logging.info('结束回复')
         return reply

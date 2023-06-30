@@ -14,7 +14,7 @@ fckmsg = config['LLM']['fckmsg'].replace('\\n', '\n')
 fckaftHuman=config['LLM']['fckaftHuman']
 fckaftAI=config['LLM']['fckaftAI']
 chanel_id=config['LLM_Claude']['chanel_id']
-
+limit_words = config['LLM']['limit_words'].replace('\\n', '\n')
 
 class SlackClient(WebClient):
 
@@ -123,6 +123,11 @@ class Claude(Brain):
                 prompt += f'System Information: ```\n{mes.content}\n```\n'
             elif isinstance(mes, AIMessage):
                 prompt += f'AI{fckaftAI}: ```\n{mes.content}\n```\n'
+        
+# ==== limit_words开始处 ====
+        if limit_words:
+            prompt += limit_words
+# ==== limit_words结束处 ====
         self.claude.chat(prompt)
         return self.claude.get_reply_nonstream(self.bot_id)
 
